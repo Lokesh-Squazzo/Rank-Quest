@@ -1,0 +1,15 @@
+# IDE Files
+.idea/
+*.iml
+
+# Backend Compiled Files
+Back-End/target/
+Back-End/*.jar
+
+# Frontend Dependencies & Build
+Front-End/node_modules/
+Front-End/dist/
+Front-End/.env
+
+# OS Files
+.DS_Store
