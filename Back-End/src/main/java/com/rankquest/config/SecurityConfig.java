@@ -31,7 +31,7 @@ public class SecurityConfig {
         // Allow BOTH local development and your live production frontend
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
-                "https://rank-quest.vercel.app/" // <-- Update this later with your real Vercel URL
+                "https://rank-quest.vercel.app/"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
