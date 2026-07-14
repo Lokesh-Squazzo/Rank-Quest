@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -15,30 +15,32 @@ import CodePlayground from './pages/CodePlayground';
 
 function App() {
   return (
-      <BrowserRouter>
-        <div className="min-h-screen bg-background">
-          <Navbar />
-          <main className="pt-16">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="pt-16">
+        <Routes>
 
-              {/* Public Pages */}
-              <Route path="/sheets" element={<Sheets />} />
-              <Route path="/rankings" element={<Rankings />} />
-              <Route path="/resources" element={<Resources />} />
-              <Route path="/playground" element={<CodePlayground />} />
+          <Route path="/" element={<Dashboard />} />
 
-              {/* Protected Pages */}
-              <Route path="/sheets/:sheetId" element={<ProtectedRoute><SheetDetail /></ProtectedRoute>} />
-              <Route path="/problem/:problemId" element={<ProtectedRoute><ProblemSolver /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Public Pages */}
+          <Route path="/sheets" element={<Sheets />} />
+          <Route path="/rankings" element={<Rankings />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/playground" element={<CodePlayground />} />
+
+          {/* Protected Pages (Login Required) */}
+          <Route path="/sheets/:sheetId" element={<ProtectedRoute><SheetDetail /></ProtectedRoute>} />
+          <Route path="/problem/:problemId" element={<ProtectedRoute><ProblemSolver /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
+
+        </Routes>
+      </main>
+    </div>
   );
 }
 
