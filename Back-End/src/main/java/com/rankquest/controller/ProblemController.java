@@ -12,8 +12,11 @@ import java.util.List;
 @RequestMapping("/api/problems")
 public class ProblemController {
 
-    @Autowired
-    private ProblemRepository problemRepository;
+    private final ProblemRepository problemRepository;
+
+    public ProblemController(ProblemRepository problemRepository) {
+        this.problemRepository = problemRepository;
+    }
 
     // Endpoint to get all problems (for the problem list page)
     @GetMapping

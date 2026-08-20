@@ -19,14 +19,15 @@ import java.util.Optional;
 @RequestMapping("/api/submissions")
 public class SubmissionController {
 
-    @Autowired
-    private SubmissionRepository submissionRepository;
+    private final SubmissionRepository submissionRepository;
+    private final UserRepository userRepository;
+    private final ProblemRepository problemRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ProblemRepository problemRepository;
+    public SubmissionController(SubmissionRepository submissionRepository, UserRepository userRepository, ProblemRepository problemRepository) {
+        this.submissionRepository = submissionRepository;
+        this.userRepository = userRepository;
+        this.problemRepository = problemRepository;
+    }
 
     @PostMapping("/{problemId}")
     public ResponseEntity<?> submitSolution(

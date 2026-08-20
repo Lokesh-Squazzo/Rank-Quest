@@ -14,8 +14,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/rankings")
 public class RankingController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public RankingController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     private static final String ADMIN_USERNAME = "admin";
 
