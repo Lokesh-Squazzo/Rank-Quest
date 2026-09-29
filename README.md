@@ -15,7 +15,7 @@ Write, edit, and test your code in real-time with an integrated Monaco editor an
 
 
 ### 🏆 Global & College Rankings
-Track your progress and compete globally or within your institution.
+Track your progress and compete globally or within your institution and improve coding culture in college.
 <img width="1860" height="1063" alt="image" src="https://github.com/user-attachments/assets/04aebc81-5d19-4cc0-b67d-0dc0f2e7b487" />
 <img width="920" height="529" alt="image" src="https://github.com/user-attachments/assets/d387de86-7e37-463a-95bf-be73adc46263" />
 
