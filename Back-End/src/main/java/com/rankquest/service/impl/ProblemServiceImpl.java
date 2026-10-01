@@ -1,0 +1,31 @@
+package com.rankquest.service.impl;
+
+import com.rankquest.exception.ResourceNotFoundException;
+import com.rankquest.model.Problem;
+import com.rankquest.repository.ProblemRepository;
+import com.rankquest.service.ProblemService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ProblemServiceImpl implements ProblemService {
+
+    private final ProblemRepository problemRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Problem> getAllProblems() {
+        return problemRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Problem getProblemById(Long id) {
+        return problemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Problem not found with id: " + id));
+    }
+}
