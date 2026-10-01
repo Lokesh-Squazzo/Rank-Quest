@@ -1,14 +1,19 @@
 package com.rankquest.dto;
 
 import com.rankquest.model.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserProfileResponse {
     private Long id;
     private String name;
+    private String username;
     private String email;
     private String rollNumber;
     private String college;
@@ -17,25 +22,24 @@ public class UserProfileResponse {
     private String location;
     private String bio;
     private String role;
-
-    // --- NEW FIELDS FOR RANKING ---
     private int totalScore;
     private int problemsSolved;
 
     public UserProfileResponse(User user) {
-        this.id = user.getId();
-        this.name = user.getUsername();
-        this.email = user.getEmail();
-        this.rollNumber = user.getRollNumber();
-        this.college = user.getCollege();
-        this.branch = user.getBranch();
-        this.year = user.getYear();
-        this.location = user.getLocation();
-        this.bio = user.getBio();
-        this.role = user.getRole().name();
-
-        // Map the stats
-        this.totalScore = user.getTotalScore();
-        this.problemsSolved = user.getProblemsSolved();
+        if (user != null) {
+            this.id = user.getId();
+            this.name = user.getUsername();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.rollNumber = user.getRollNumber();
+            this.college = user.getCollege();
+            this.branch = user.getBranch();
+            this.year = user.getYear();
+            this.location = user.getLocation();
+            this.bio = user.getBio();
+            this.role = user.getRole() != null ? user.getRole().name() : null;
+            this.totalScore = user.getTotalScore();
+            this.problemsSolved = user.getProblemsSolved();
+        }
     }
 }
