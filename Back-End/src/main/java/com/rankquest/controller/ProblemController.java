@@ -1,8 +1,8 @@
 package com.rankquest.controller;
 
 import com.rankquest.model.Problem;
-import com.rankquest.repository.ProblemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rankquest.service.ProblemService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,25 +10,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/problems")
+@RequiredArgsConstructor
 public class ProblemController {
 
-    private final ProblemRepository problemRepository;
+    private final ProblemService problemService;
 
-    public ProblemController(ProblemRepository problemRepository) {
-        this.problemRepository = problemRepository;
-    }
-
-    // Endpoint to get all problems (for the problem list page)
     @GetMapping
-    public List<Problem> getAllProblems() {
-        return problemRepository.findAll();
+    public ResponseEntity<List<Problem>> getAllProblems() {
+        return ResponseEntity.ok(problemService.getAllProblems());
     }
 
-    // Endpoint to get a single problem by ID (for the problem description page)
     @GetMapping("/{id}")
     public ResponseEntity<Problem> getProblemById(@PathVariable Long id) {
-        return problemRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(problemService.getProblemById(id));
     }
 }

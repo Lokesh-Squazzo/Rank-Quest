@@ -1,46 +1,27 @@
 package com.rankquest.controller;
 
 import com.rankquest.dto.UserProfileResponse;
-import com.rankquest.model.User;
-import com.rankquest.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rankquest.service.RankingService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/rankings")
+@RequiredArgsConstructor
 public class RankingController {
 
-    private final UserRepository userRepository;
-
-    public RankingController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    private static final String ADMIN_USERNAME = "admin";
+    private final RankingService rankingService;
 
     @GetMapping("/global")
     public ResponseEntity<List<UserProfileResponse>> getGlobalRankings() {
-        List<User> topUsers = userRepository.findTop50ByUsernameNotOrderByTotalScoreDesc(ADMIN_USERNAME);
-
-        List<UserProfileResponse> response = topUsers.stream()
-                .map(UserProfileResponse::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(rankingService.getGlobalRankings());
     }
 
     @GetMapping("/college")
     public ResponseEntity<List<UserProfileResponse>> getCollegeRankings(@RequestParam String college) {
-        List<User> topUsers = userRepository.findTop50ByCollegeAndUsernameNotOrderByTotalScoreDesc(college, ADMIN_USERNAME);
-
-        List<UserProfileResponse> response = topUsers.stream()
-                .map(UserProfileResponse::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(rankingService.getCollegeRankings(college));
     }
 }
