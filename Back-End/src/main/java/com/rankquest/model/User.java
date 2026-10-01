@@ -32,6 +32,7 @@ public class User {
     private String rollNumber;
     private String college;
     private String branch;
+    @Column(name = "\"year\"")
     private String year;
     private String location;
 
