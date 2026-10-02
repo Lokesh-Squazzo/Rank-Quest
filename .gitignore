@@ -1,5 +1,6 @@
 # IDE Files
 .idea/
+.vscode/
 *.iml
 
 # Backend Compiled Files

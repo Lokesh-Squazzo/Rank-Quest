@@ -9,8 +9,14 @@ import com.rankquest.exception.BadRequestException;
 import com.rankquest.model.Role;
 import com.rankquest.model.User;
 import com.rankquest.repository.UserRepository;
+import com.rankquest.security.jwt.JwtUtils;
 import com.rankquest.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +27,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
     @Override
     @Transactional
@@ -51,18 +59,26 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public ApiResponse<AuthResponseData> authenticateUser(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new BadRequestException("Error: Invalid email or password"));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt = jwtUtils.generateJwtToken(authentication);
+
+            User user = userRepository.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new BadRequestException("Error: User not found"));
+
+            AuthResponseData responseData = AuthResponseData.builder()
+                    .token(jwt)
+                    .user(new UserProfileResponse(user))
+                    .build();
+
+            return ApiResponse.success("Login successful", responseData);
+        } catch (BadCredentialsException ex) {
             throw new BadRequestException("Error: Invalid email or password");
         }
-
-        AuthResponseData responseData = AuthResponseData.builder()
-                .token("dummy-jwt-token-" + user.getId())
-                .user(new UserProfileResponse(user))
-                .build();
-
-        return ApiResponse.success("Login successful", responseData);
     }
 }
