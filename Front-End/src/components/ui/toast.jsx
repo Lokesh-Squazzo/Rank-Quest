@@ -11,6 +11,7 @@ const Toast = React.forwardRef(({ className, variant = "default", ...props }, re
         {
           "border bg-background text-foreground": variant === "default",
           "destructive group border-destructive bg-destructive text-destructive-foreground": variant === "destructive",
+          "border-emerald-500/30 bg-emerald-950/90 text-emerald-200": variant === "success",
         },
         className
       )}

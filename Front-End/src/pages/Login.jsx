@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Brain, ArrowRight, Loader2, Mail, Lock } from 'lucide-react';
+import { Brain, ArrowRight, Loader2, Mail, Lock, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -18,6 +18,7 @@ const schema = Yup.object().shape({
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +35,7 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
+    setServerError(null);
     const result = await login(data);
     setIsLoading(false);
 
@@ -47,9 +49,11 @@ const Login = () => {
       const from = location.state?.from?.pathname || '/';
       navigate(from);
     } else {
+      const errorMsg = result.error || 'Invalid email or password';
+      setServerError(errorMsg);
       toast({
         title: 'Login failed',
-        description: result.error,
+        description: errorMsg,
         variant: 'destructive',
       });
     }
@@ -86,6 +90,12 @@ const Login = () => {
            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
           <CardContent className="p-8 sm:p-10relative z-10">
             <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+              {serverError && (
+                <div className="p-3.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-sm flex items-start gap-2.5">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-400" />
+                  <span>{serverError}</span>
+                </div>
+              )}
               <div>
                 <Label htmlFor="email" className="text-gray-300 flex items-center gap-2 mb-2">
                     <Mail className="w-4 h-4" /> Email address

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, School, MapPin, UserPlus, BookOpen, Calendar, Hash } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, School, MapPin, UserPlus, BookOpen, Calendar, Hash, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -22,6 +22,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState(null);
   
   const { register } = useAuth();
   const { toast } = useToast();
@@ -36,22 +37,27 @@ const Register = () => {
 
   const validateForm = () => {
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.rollNumber) {
+      const msg = 'Please fill in all required fields (Name, Email, Password, Roll No)';
+      setServerError(msg);
       toast({
-        title: 'Error',
-        description: 'Please fill in all required fields (Name, Email, Password, Roll No)',
+        title: 'Validation Error',
+        description: msg,
         variant: 'destructive'
       });
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
+      const msg = 'Passwords do not match';
+      setServerError(msg);
       toast({
-        title: 'Error',
-        description: 'Passwords do not match',
+        title: 'Validation Error',
+        description: msg,
         variant: 'destructive'
       });
       return false;
     }
+    setServerError(null);
     return true;
   };
 
@@ -61,6 +67,7 @@ const Register = () => {
     if (!validateForm()) return;
 
     setLoading(true);
+    setServerError(null);
     
     // Prepare data specifically for the Spring Boot backend
     // We map the form fields to the DTO expected by AuthController
@@ -81,20 +88,24 @@ const Register = () => {
         toast({
           title: 'Success!',
           description: 'Account created. Please log in to continue.',
-          variant: 'default'
+          variant: 'success'
         });
         navigate('/login');
       } else {
+        const errorMsg = result.error || 'Failed to create account';
+        setServerError(errorMsg);
         toast({
           title: 'Registration Failed',
-          description: result.error || 'Failed to create account',
+          description: errorMsg,
           variant: 'destructive'
         });
       }
     } catch (error) {
+      const errorMsg = error.message || 'Something went wrong. Please try again.';
+      setServerError(errorMsg);
       toast({
         title: 'Error',
-        description: 'Something went wrong. Please try again.',
+        description: errorMsg,
         variant: 'destructive'
       });
     } finally {
@@ -117,6 +128,12 @@ const Register = () => {
             <Card>
                 <CardContent className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {serverError && (
+                          <div className="p-3.5 rounded-xl bg-destructive/15 border border-destructive/30 text-red-400 text-sm flex items-start gap-2.5">
+                            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
+                            <span>{serverError}</span>
+                          </div>
+                        )}
                         {/* Personal Info Section */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
