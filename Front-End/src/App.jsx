@@ -12,6 +12,8 @@ import Resources from './pages/Resources';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import CodePlayground from './pages/CodePlayground';
+import AdminRoute from './components/AdminRoute';
+import AdminProblems from './pages/admin/AdminProblems';
 
 function App() {
   return (
@@ -37,6 +39,9 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
+          {/* Admin Protected Pages */}
+          <Route path="/admin" element={<AdminRoute><AdminProblems /></AdminRoute>} />
+          <Route path="/admin/problems" element={<AdminRoute><AdminProblems /></AdminRoute>} />
 
         </Routes>
       </main>
