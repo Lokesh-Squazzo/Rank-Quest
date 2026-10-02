@@ -76,22 +76,60 @@ export const updateUserProfile = (data) => {
     });
 };
 
-export const getSolvedProblems = () => {
+// Solved problems cache and in-flight deduplication
+let solvedProblemsCache = null;
+let lastSolvedFetchTime = 0;
+let solvedFetchPromise = null;
+const SOLVED_CACHE_TTL = 45 * 1000; // 45 seconds
+
+export const invalidateSolvedProblemsCache = () => {
+    solvedProblemsCache = null;
+    lastSolvedFetchTime = 0;
+    solvedFetchPromise = null;
+};
+
+export const getSolvedProblems = async (forceRefresh = false) => {
+    const now = Date.now();
+    if (!forceRefresh && solvedProblemsCache && (now - lastSolvedFetchTime < SOLVED_CACHE_TTL)) {
+        return solvedProblemsCache;
+    }
+
+    // Reuse in-flight promise if multiple components request at once
+    if (solvedFetchPromise) {
+        return solvedFetchPromise;
+    }
+
     const savedUser = localStorage.getItem('rankquest_user');
     const email = savedUser ? JSON.parse(savedUser).email : '';
 
-    return request(`/submissions/my-solved?email=${email}`, {
-        method: 'GET',
-    });
+    solvedFetchPromise = (async () => {
+        try {
+            const data = await request(`/submissions/my-solved?email=${email}`, {
+                method: 'GET',
+            });
+            solvedProblemsCache = data;
+            lastSolvedFetchTime = Date.now();
+            return data;
+        } finally {
+            solvedFetchPromise = null;
+        }
+    })();
+
+    return solvedFetchPromise;
 };
+
 // In-memory cache for problems to eliminate duplicate network delays across navigations
 let problemsCache = null;
 let lastProblemsFetchTime = 0;
 const PROBLEMS_CACHE_TTL = 60 * 1000; // 60 seconds
 
+// In-memory cache for individual problem details
+const problemDetailCache = new Map();
+
 export const invalidateProblemsCache = () => {
     problemsCache = null;
     lastProblemsFetchTime = 0;
+    problemDetailCache.clear();
 };
 
 // --- Problem Endpoints ---
@@ -108,26 +146,34 @@ export const getAllProblems = async (forceRefresh = false) => {
     return data;
 };
 
-export const getProblemById = (id) => {
-    return request(`/problems/${id}`, {
+export const getProblemById = async (id, forceRefresh = false) => {
+    const cacheKey = String(id);
+    if (!forceRefresh && problemDetailCache.has(cacheKey)) {
+        return problemDetailCache.get(cacheKey);
+    }
+    const data = await request(`/problems/${id}`, {
         method: 'GET',
     });
+    problemDetailCache.set(cacheKey, data);
+    return data;
 };
 
-
 // --- Submission Endpoints ---
-export const submitSolution = (problemId, submissionData) => {
+export const submitSolution = async (problemId, submissionData) => {
     const savedUser = localStorage.getItem('rankquest_user');
     const email = savedUser ? JSON.parse(savedUser).email : '';
 
-    return request(`/submissions/${problemId}?email=${email}`, {
+    const result = await request(`/submissions/${problemId}?email=${email}`, {
         method: 'POST',
         body: JSON.stringify(submissionData),
     });
+
+    // Invalidate solved problems cache so solved state updates immediately
+    invalidateSolvedProblemsCache();
+    return result;
 };
 
 // --- Ranking Endpoints ---
-
 export const getGlobalRankings = () => {
     return request('/rankings/global', {
         method: 'GET',
