@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 // FIX: Added 'Target' to the imports
 import { Code, Users, Star, Filter, Search, BookOpen, TrendingUp, ArrowRight, Sparkles, Zap, Target } from 'lucide-react'
+import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Badge } from '../components/ui/badge'
@@ -155,11 +156,14 @@ const Sheets = () => {
   const difficulties = ['all', 'Easy', 'Medium', 'Hard', 'Mixed']
 
   const filteredSheets = sheets.filter(sheet => {
-    const matchesSearch = sheet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         sheet.author.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesDifficulty = selectedDifficulty === 'all' || sheet.difficulty === selectedDifficulty
-    const matchesCategory = selectedCategory === 'all' || sheet.category === selectedCategory
-    return matchesSearch && matchesDifficulty && matchesCategory
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = sheet.name.toLowerCase().includes(term) ||
+                         sheet.author.toLowerCase().includes(term) ||
+                         (sheet.description && sheet.description.toLowerCase().includes(term)) ||
+                         (sheet.topics && sheet.topics.some(t => t.toLowerCase().includes(term)));
+    const matchesDifficulty = selectedDifficulty === 'all' || sheet.difficulty === selectedDifficulty;
+    const matchesCategory = selectedCategory === 'all' || sheet.category === selectedCategory;
+    return matchesSearch && matchesDifficulty && matchesCategory;
   })
 
   return (

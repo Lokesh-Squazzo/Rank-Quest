@@ -14,13 +14,15 @@ import Settings from './pages/Settings';
 import CodePlayground from './pages/CodePlayground';
 import AdminRoute from './components/AdminRoute';
 import AdminProblems from './pages/admin/AdminProblems';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-16">
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
 
           <Route path="/" element={<Dashboard />} />
 
@@ -44,6 +46,7 @@ function App() {
           <Route path="/admin/problems" element={<AdminRoute><AdminProblems /></AdminRoute>} />
 
         </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   );
