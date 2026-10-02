@@ -124,3 +124,25 @@ export const getCollegeRankings = (collegeName) => {
         method: 'GET',
     });
 };
+
+// --- Admin Problem Endpoints ---
+export const createAdminProblem = (problemData) => {
+    return request('/admin/problems', {
+        method: 'POST',
+        body: JSON.stringify(problemData),
+    });
+};
+
+export const updateAdminProblem = (problemId, problemData) => {
+    return request(`/admin/problems/${problemId}`, {
+        method: 'PUT',
+        body: JSON.stringify(problemData),
+    });
+};
+
+export const deleteAdminProblem = (problemId) => {
+    return request(`/admin/problems/${problemId}`, {
+        method: 'DELETE',
+    });
+};
+

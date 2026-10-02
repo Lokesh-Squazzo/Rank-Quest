@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, User, Settings, LogOut, Code2, Trophy, BookOpen, Zap, Brain, Home, Moon, Sun } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, Code2, Trophy, BookOpen, Zap, Brain, Home, Moon, Sun, Shield } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext'; // Import Theme Hook
@@ -80,6 +80,20 @@ const Navbar = () => {
               </Link>
             ))}
             
+            {user?.role === 'ADMIN' && (
+              <Link
+                to="/admin/problems"
+                className={`px-3.5 py-1.5 rounded-xl font-medium text-sm flex items-center gap-1.5 transition-all duration-300 ${
+                  location.pathname.startsWith('/admin')
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/25'
+                    : 'text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin</span>
+              </Link>
+            )}
+
             <div className="h-6 w-px bg-border/50 mx-2"></div>
 
             {/* Theme Toggle */}
@@ -109,10 +123,21 @@ const Navbar = () => {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-3 w-64 border border-white/10 rounded-2xl shadow-2xl py-2 z-50 bg-[#0a0a0f] backdrop-blur-xl ring-1 ring-black ring-opacity-5">
                     <div className="px-4 py-3 border-b border-white/10">
-                        <div className="font-semibold text-white">{getDisplayName()}</div>
+                        <div className="font-semibold text-white flex items-center justify-between">
+                          <span>{getDisplayName()}</span>
+                          {user?.role === 'ADMIN' && (
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Admin</span>
+                          )}
+                        </div>
                         <div className="text-sm text-gray-400">{user?.email}</div>
                     </div>
                     
+                    {user?.role === 'ADMIN' && (
+                      <Link to="/admin/problems" className="flex items-center px-4 py-3 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors font-medium border-b border-white/5" onClick={() => setShowUserMenu(false)}>
+                        <Shield className="w-4 h-4 mr-2 text-purple-400" /> Admin Dashboard
+                      </Link>
+                    )}
+
                     <Link to="/profile" className="flex items-center px-4 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setShowUserMenu(false)}>
                       <User className="w-4 h-4 mr-2" /> Profile
                     </Link>
@@ -175,6 +200,11 @@ const Navbar = () => {
                       <div className="text-xs text-muted-foreground">{user?.email}</div>
                     </div>
                   </div>
+                  {user?.role === 'ADMIN' && (
+                    <Link to="/admin/problems" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-2 text-base font-medium text-purple-400 hover:bg-purple-500/10 rounded-md">
+                      <Shield className="w-4 h-4 mr-2" /> Admin Dashboard
+                    </Link>
+                  )}
                   <Link to="/settings" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-foreground hover:bg-white/5 rounded-md">Settings</Link>
                   <button onClick={() => { handleLogout(); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-base font-medium text-red-400 hover:bg-white/5 rounded-md">Sign Out</button>
                </div>
