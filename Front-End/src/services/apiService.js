@@ -84,11 +84,28 @@ export const getSolvedProblems = () => {
         method: 'GET',
     });
 };
+// In-memory cache for problems to eliminate duplicate network delays across navigations
+let problemsCache = null;
+let lastProblemsFetchTime = 0;
+const PROBLEMS_CACHE_TTL = 60 * 1000; // 60 seconds
+
+export const invalidateProblemsCache = () => {
+    problemsCache = null;
+    lastProblemsFetchTime = 0;
+};
+
 // --- Problem Endpoints ---
-export const getAllProblems = () => {
-    return request('/problems', {
+export const getAllProblems = async (forceRefresh = false) => {
+    const now = Date.now();
+    if (!forceRefresh && problemsCache && (now - lastProblemsFetchTime < PROBLEMS_CACHE_TTL)) {
+        return problemsCache;
+    }
+    const data = await request('/problems', {
         method: 'GET',
     });
+    problemsCache = data;
+    lastProblemsFetchTime = now;
+    return data;
 };
 
 export const getProblemById = (id) => {
@@ -126,23 +143,29 @@ export const getCollegeRankings = (collegeName) => {
 };
 
 // --- Admin Problem Endpoints ---
-export const createAdminProblem = (problemData) => {
-    return request('/admin/problems', {
+export const createAdminProblem = async (problemData) => {
+    const res = await request('/admin/problems', {
         method: 'POST',
         body: JSON.stringify(problemData),
     });
+    invalidateProblemsCache();
+    return res;
 };
 
-export const updateAdminProblem = (problemId, problemData) => {
-    return request(`/admin/problems/${problemId}`, {
+export const updateAdminProblem = async (problemId, problemData) => {
+    const res = await request(`/admin/problems/${problemId}`, {
         method: 'PUT',
         body: JSON.stringify(problemData),
     });
+    invalidateProblemsCache();
+    return res;
 };
 
-export const deleteAdminProblem = (problemId) => {
-    return request(`/admin/problems/${problemId}`, {
+export const deleteAdminProblem = async (problemId) => {
+    const res = await request(`/admin/problems/${problemId}`, {
         method: 'DELETE',
     });
+    invalidateProblemsCache();
+    return res;
 };
 
