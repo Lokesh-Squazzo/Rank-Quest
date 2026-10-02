@@ -78,10 +78,20 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createProblemIfNotFound(String title, String description, String difficulty, String acceptance, int points, String testCases) {
-        if (!problemRepository.existsByTitle(title)) {
+        problemRepository.findByTitle(title).ifPresentOrElse(existing -> {
+            // Repair any legacy rows where @Lob had stored raw OID integer identifiers as text
+            if (existing.getDescription() == null || existing.getDescription().matches("^\\d+$")) {
+                existing.setDescription(description);
+                existing.setTestCases(testCases);
+                existing.setDifficulty(difficulty);
+                existing.setAcceptance(acceptance);
+                existing.setPoints(points);
+                problemRepository.save(existing);
+            }
+        }, () -> {
             Problem p = new Problem(title, description, difficulty, acceptance, points, testCases);
             problemRepository.save(p);
-        }
+        });
     }
 
     private void createDefaultAdmin() {

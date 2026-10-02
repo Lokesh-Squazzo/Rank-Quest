@@ -24,6 +24,7 @@ public class UserDetailsImpl implements UserDetails {
     private final String password;
 
     private final Collection<? extends GrantedAuthority> authorities;
+    private final User user;
 
     public static UserDetailsImpl build(User user) {
         String roleName = user.getRole() != null ? "ROLE_" + user.getRole().name() : "ROLE_USER";
@@ -34,7 +35,8 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                Collections.singletonList(authority)
+                Collections.singletonList(authority),
+                user
         );
     }
 

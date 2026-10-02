@@ -68,8 +68,9 @@ public class AuthServiceImpl implements AuthService {
 
             String jwt = jwtUtils.generateJwtToken(authentication);
 
-            User user = userRepository.findByEmail(loginRequest.getEmail())
-                    .orElseThrow(() -> new BadRequestException("Error: User not found"));
+            com.rankquest.security.UserDetailsImpl userDetails =
+                    (com.rankquest.security.UserDetailsImpl) authentication.getPrincipal();
+            User user = userDetails.getUser();
 
             AuthResponseData responseData = AuthResponseData.builder()
                     .token(jwt)
