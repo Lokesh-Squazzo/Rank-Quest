@@ -97,5 +97,62 @@ public class AuthIntegrationTest {
                 .andExpect(jsonPath("$.data.email").value("Email must be a valid email address"))
                 .andExpect(jsonPath("$.data.password").value("Password must be at least 6 characters"));
     }
+
+    @Test
+    @DisplayName("Submit problem solution and retrieve history")
+    void testSubmissionAndHistory() throws Exception {
+        SignUpRequest signUpRequest = SignUpRequest.builder()
+                .username("coder1")
+                .email("coder1@example.com")
+                .password("password123")
+                .college("Coding Institute")
+                .branch("IT")
+                .year("4th")
+                .build();
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signUpRequest)))
+                .andExpect(status().isOk());
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("coder1@example.com")
+                .password("password123")
+                .build();
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .path("data").path("token").asText();
+
+        // Submit solution for problem 1
+        com.rankquest.dto.SubmissionRequest submissionRequest = com.rankquest.dto.SubmissionRequest.builder()
+                .code("class Solution { public static void main(String[] args) {} }")
+                .language("java")
+                .status("ACCEPTED")
+                .build();
+
+        mockMvc.perform(post("/api/submissions/1")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submissionRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.problemId").value(1))
+                .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
+
+        // Retrieve submission history
+        mockMvc.perform(get("/api/submissions/my-history")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].problemId").value(1))
+                .andExpect(jsonPath("$.data[0].status").value("ACCEPTED"));
+    }
 }
+
 

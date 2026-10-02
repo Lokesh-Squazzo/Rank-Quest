@@ -2,6 +2,7 @@ package com.rankquest.service.impl;
 
 import com.rankquest.dto.ApiResponse;
 import com.rankquest.dto.SubmissionRequest;
+import com.rankquest.dto.SubmissionResponse;
 import com.rankquest.exception.ResourceNotFoundException;
 import com.rankquest.model.Problem;
 import com.rankquest.model.Submission;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     @Transactional
-    public ApiResponse<Submission> submitSolution(Long problemId, String email, SubmissionRequest request) {
+    public ApiResponse<SubmissionResponse> submitSolution(Long problemId, String email, SubmissionRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
@@ -55,7 +57,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             userRepository.save(user);
         }
 
-        return ApiResponse.success("Submission recorded", submission);
+        return ApiResponse.success("Submission recorded", SubmissionResponse.fromEntity(submission));
     }
 
     @Override
@@ -65,5 +67,29 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
         return submissionRepository.findSolvedProblemIds(user.getId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SubmissionResponse> getUserSubmissions(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        return submissionRepository.findByUserIdOrderBySubmittedAtDesc(user.getId())
+                .stream()
+                .map(SubmissionResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SubmissionResponse> getProblemSubmissions(Long problemId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        return submissionRepository.findByUserIdAndProblemIdOrderBySubmittedAtDesc(user.getId(), problemId)
+                .stream()
+                .map(SubmissionResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 }

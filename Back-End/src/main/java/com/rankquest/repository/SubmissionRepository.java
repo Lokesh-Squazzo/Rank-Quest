@@ -11,6 +11,10 @@ import java.util.List;
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findByUserId(Long userId);
 
+    List<Submission> findByUserIdOrderBySubmittedAtDesc(Long userId);
+
+    List<Submission> findByUserIdAndProblemIdOrderBySubmittedAtDesc(Long userId, Long problemId);
+
     boolean existsByUserIdAndProblemIdAndStatus(Long userId, Long problemId, String status);
 
     // --- NEW QUERY ---
