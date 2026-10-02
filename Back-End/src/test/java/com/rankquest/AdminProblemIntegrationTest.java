@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -159,5 +161,48 @@ public class AdminProblemIntegrationTest {
                 .andExpect(jsonPath("$.data.difficulty").value("Hard"))
                 .andExpect(jsonPath("$.data.points").value(25));
     }
+
+    @Test
+    @DisplayName("Admin can delete a problem, while non-admin is forbidden")
+    void testDeleteProblemSecurity() throws Exception {
+        String adminToken = getAdminToken();
+        String userToken = getNormalUserToken();
+
+        // 1. Create a problem to delete
+        ProblemRequest problemRequest = ProblemRequest.builder()
+                .title("Problem To Be Deleted")
+                .description("Temporary problem")
+                .difficulty("Easy")
+                .acceptance("50.0%")
+                .points(10)
+                .testCases("[]")
+                .build();
+
+        MvcResult createResult = mockMvc.perform(post("/api/admin/problems")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(problemRequest)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long problemId = objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        // 2. Regular user should receive 403 Forbidden
+        mockMvc.perform(delete("/api/admin/problems/" + problemId)
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden());
+
+        // 3. Admin should receive 200 OK
+        mockMvc.perform(delete("/api/admin/problems/" + problemId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+
+        // 4. Verify problem is gone (GET returns 404)
+        mockMvc.perform(get("/api/problems/" + problemId))
+                .andExpect(status().isNotFound());
+    }
 }
+
 

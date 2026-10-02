@@ -20,4 +20,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     // --- NEW QUERY ---
     @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user.id = :userId AND s.status = 'ACCEPTED'")
     List<Long> findSolvedProblemIds(@Param("userId") Long userId);
+
+    void deleteByProblemId(Long problemId);
 }

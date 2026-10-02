@@ -33,4 +33,10 @@ public class AdminProblemController {
         Problem updatedProblem = problemService.updateProblem(id, request);
         return ResponseEntity.ok(ApiResponse.success("Problem updated successfully", updatedProblem));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteProblem(@PathVariable Long id) {
+        problemService.deleteProblem(id);
+        return ResponseEntity.ok(ApiResponse.success("Problem deleted successfully"));
+    }
 }

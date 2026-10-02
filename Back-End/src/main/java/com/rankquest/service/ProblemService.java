@@ -9,4 +9,5 @@ public interface ProblemService {
     Problem getProblemById(Long id);
     Problem createProblem(ProblemRequest request);
     Problem updateProblem(Long id, ProblemRequest request);
+    void deleteProblem(Long id);
 }

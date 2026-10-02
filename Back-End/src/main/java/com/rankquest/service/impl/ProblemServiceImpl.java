@@ -4,6 +4,7 @@ import com.rankquest.dto.ProblemRequest;
 import com.rankquest.exception.ResourceNotFoundException;
 import com.rankquest.model.Problem;
 import com.rankquest.repository.ProblemRepository;
+import com.rankquest.repository.SubmissionRepository;
 import com.rankquest.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 public class ProblemServiceImpl implements ProblemService {
 
     private final ProblemRepository problemRepository;
+    private final SubmissionRepository submissionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -63,5 +65,15 @@ public class ProblemServiceImpl implements ProblemService {
         }
 
         return problemRepository.save(problem);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProblem(Long id) {
+        Problem problem = problemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Problem not found with id: " + id));
+
+        submissionRepository.deleteByProblemId(id);
+        problemRepository.delete(problem);
     }
 }
