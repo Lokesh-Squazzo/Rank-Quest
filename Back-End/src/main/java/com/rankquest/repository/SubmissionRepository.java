@@ -17,7 +17,17 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     boolean existsByUserIdAndProblemIdAndStatus(Long userId, Long problemId, String status);
 
-    // --- NEW QUERY ---
+    // --- Direct email queries to avoid separate user lookup roundtrip ---
+    @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user.email = :email AND s.status = 'ACCEPTED'")
+    List<Long> findSolvedProblemIdsByEmail(@Param("email") String email);
+
+    @Query("SELECT s FROM Submission s WHERE s.user.email = :email ORDER BY s.submittedAt DESC")
+    List<Submission> findByUserEmailOrderBySubmittedAtDesc(@Param("email") String email);
+
+    @Query("SELECT s FROM Submission s WHERE s.user.email = :email AND s.problem.id = :problemId ORDER BY s.submittedAt DESC")
+    List<Submission> findByUserEmailAndProblemIdOrderBySubmittedAtDesc(@Param("email") String email, @Param("problemId") Long problemId);
+
+    // --- Legacy ID-based queries ---
     @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user.id = :userId AND s.status = 'ACCEPTED'")
     List<Long> findSolvedProblemIds(@Param("userId") Long userId);
 

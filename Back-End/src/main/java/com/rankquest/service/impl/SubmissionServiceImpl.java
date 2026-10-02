@@ -63,19 +63,13 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     @Transactional(readOnly = true)
     public List<Long> getSolvedProblemIds(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-        return submissionRepository.findSolvedProblemIds(user.getId());
+        return submissionRepository.findSolvedProblemIdsByEmail(email);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<SubmissionResponse> getUserSubmissions(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-        return submissionRepository.findByUserIdOrderBySubmittedAtDesc(user.getId())
+        return submissionRepository.findByUserEmailOrderBySubmittedAtDesc(email)
                 .stream()
                 .map(SubmissionResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -84,10 +78,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     @Transactional(readOnly = true)
     public List<SubmissionResponse> getProblemSubmissions(Long problemId, String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-        return submissionRepository.findByUserIdAndProblemIdOrderBySubmittedAtDesc(user.getId(), problemId)
+        return submissionRepository.findByUserEmailAndProblemIdOrderBySubmittedAtDesc(email, problemId)
                 .stream()
                 .map(SubmissionResponse::fromEntity)
                 .collect(Collectors.toList());
