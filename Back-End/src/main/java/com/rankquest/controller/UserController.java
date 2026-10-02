@@ -5,6 +5,7 @@ import com.rankquest.dto.UpdateProfileRequest;
 import com.rankquest.dto.UserProfileResponse;
 import com.rankquest.exception.BadRequestException;
 import com.rankquest.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -40,7 +41,7 @@ public class UserController {
 
     @PutMapping("/profile")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateUserProfile(
-            @RequestBody UpdateProfileRequest request,
+            @Valid @RequestBody UpdateProfileRequest request,
             Principal principal,
             @RequestParam(required = false) String email) {
         String effectiveEmail = resolveEmail(principal, email);

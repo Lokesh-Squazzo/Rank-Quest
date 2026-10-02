@@ -78,4 +78,24 @@ public class AuthIntegrationTest {
                 .andExpect(jsonPath("$.data.user.email").value("testjwt@example.com"))
                 .andExpect(jsonPath("$.data.user.username").value("testjwtuser"));
     }
+
+    @Test
+    @DisplayName("Validation failure on invalid signup request")
+    void testSignUpValidationFailure() throws Exception {
+        SignUpRequest invalidRequest = SignUpRequest.builder()
+                .username("ab")
+                .email("not-an-email")
+                .password("123")
+                .build();
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.data.username").value("Username must be between 3 and 50 characters"))
+                .andExpect(jsonPath("$.data.email").value("Email must be a valid email address"))
+                .andExpect(jsonPath("$.data.password").value("Password must be at least 6 characters"));
+    }
 }
+

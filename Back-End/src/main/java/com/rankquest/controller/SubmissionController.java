@@ -5,6 +5,7 @@ import com.rankquest.dto.SubmissionRequest;
 import com.rankquest.exception.BadRequestException;
 import com.rankquest.model.Submission;
 import com.rankquest.service.SubmissionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -25,7 +26,7 @@ public class SubmissionController {
             @PathVariable Long problemId,
             Principal principal,
             @RequestParam(required = false) String email,
-            @RequestBody SubmissionRequest request) {
+            @Valid @RequestBody SubmissionRequest request) {
 
         String effectiveEmail = resolveEmail(principal, email);
         ApiResponse<Submission> response = submissionService.submitSolution(problemId, effectiveEmail, request);
