@@ -203,6 +203,13 @@ public class AdminProblemIntegrationTest {
         mockMvc.perform(get("/api/problems/" + problemId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("Public can fetch all problems at /api/problems")
+    void testGetAllProblems() throws Exception {
+        mockMvc.perform(get("/api/problems"))
+                .andExpect(status().isOk());
+    }
 }
 
 

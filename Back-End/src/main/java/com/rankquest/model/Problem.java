@@ -23,11 +23,9 @@ public class Problem {
     private String acceptance;
     private int points;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String testCases;
 
