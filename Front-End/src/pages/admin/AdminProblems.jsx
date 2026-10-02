@@ -42,14 +42,18 @@ const AdminProblems = () => {
   const [deletingProblem, setDeletingProblem] = useState(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
+  const [loadError, setLoadError] = useState(null);
+
   const { toast } = useToast();
 
   const fetchProblems = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const data = await getAllProblems();
       setProblems(Array.isArray(data) ? data : []);
     } catch (err) {
+      setLoadError(err.message || 'Could not fetch problem list');
       toast({
         title: 'Failed to load problems',
         description: err.message || 'Could not fetch problem list',
@@ -239,7 +243,7 @@ const AdminProblems = () => {
             <CardContent className="p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Problems</p>
-                <p className="text-2xl font-bold text-white mt-1">{problems.length}</p>
+                <p className="text-2xl font-bold text-white mt-1">{loading ? '...' : problems.length}</p>
               </div>
               <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 <Code className="w-5 h-5" />
@@ -251,7 +255,7 @@ const AdminProblems = () => {
             <CardContent className="p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-emerald-400 uppercase tracking-wider">Easy</p>
-                <p className="text-2xl font-bold text-white mt-1">{easyCount}</p>
+                <p className="text-2xl font-bold text-white mt-1">{loading ? '...' : easyCount}</p>
               </div>
               <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <CheckCircle className="w-5 h-5" />
@@ -263,7 +267,7 @@ const AdminProblems = () => {
             <CardContent className="p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-amber-400 uppercase tracking-wider">Medium</p>
-                <p className="text-2xl font-bold text-white mt-1">{mediumCount}</p>
+                <p className="text-2xl font-bold text-white mt-1">{loading ? '...' : mediumCount}</p>
               </div>
               <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <Sparkles className="w-5 h-5" />
@@ -275,7 +279,7 @@ const AdminProblems = () => {
             <CardContent className="p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-red-400 uppercase tracking-wider">Hard</p>
-                <p className="text-2xl font-bold text-white mt-1">{hardCount}</p>
+                <p className="text-2xl font-bold text-white mt-1">{loading ? '...' : hardCount}</p>
               </div>
               <div className="p-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
                 <AlertTriangle className="w-5 h-5" />
@@ -316,7 +320,19 @@ const AdminProblems = () => {
 
         {/* Problems Table */}
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
-          {loading ? (
+          {loadError ? (
+            <div className="p-16 text-center text-gray-400">
+              <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+              <p className="text-lg font-medium text-white">Failed to load problems</p>
+              <p className="text-sm text-gray-400 mt-1 mb-5">{loadError}</p>
+              <Button 
+                onClick={fetchProblems}
+                className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl px-6 h-10"
+              >
+                Retry
+              </Button>
+            </div>
+          ) : loading ? (
             <div className="p-16 text-center text-gray-400">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 text-purple-400" />
               <p>Loading problems...</p>
