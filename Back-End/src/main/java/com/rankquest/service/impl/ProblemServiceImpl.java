@@ -1,5 +1,6 @@
 package com.rankquest.service.impl;
 
+import com.rankquest.dto.ProblemRequest;
 import com.rankquest.exception.ResourceNotFoundException;
 import com.rankquest.model.Problem;
 import com.rankquest.repository.ProblemRepository;
@@ -27,5 +28,20 @@ public class ProblemServiceImpl implements ProblemService {
     public Problem getProblemById(Long id) {
         return problemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Problem not found with id: " + id));
+    }
+
+    @Override
+    @Transactional
+    public Problem createProblem(ProblemRequest request) {
+        Problem problem = Problem.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .difficulty(request.getDifficulty())
+                .acceptance(request.getAcceptance() != null ? request.getAcceptance() : "0.0%")
+                .points(request.getPoints())
+                .testCases(request.getTestCases() != null ? request.getTestCases() : "[]")
+                .build();
+
+        return problemRepository.save(problem);
     }
 }
