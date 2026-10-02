@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,4 +105,59 @@ public class AdminProblemIntegrationTest {
                 .andExpect(jsonPath("$.data.title").value("Unique Admin Test Problem"))
                 .andExpect(jsonPath("$.data.points").value(20));
     }
+
+    @Test
+    @DisplayName("Admin can update an existing problem, while non-admin is forbidden")
+    void testUpdateProblemSecurity() throws Exception {
+        String adminToken = getAdminToken();
+        String userToken = getNormalUserToken();
+
+        // 1. Create a problem to update
+        ProblemRequest initial = ProblemRequest.builder()
+                .title("Problem Before Update")
+                .description("Initial description")
+                .difficulty("Easy")
+                .acceptance("90.0%")
+                .points(10)
+                .testCases("[]")
+                .build();
+
+        MvcResult createResult = mockMvc.perform(post("/api/admin/problems")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(initial)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long problemId = objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        ProblemRequest updated = ProblemRequest.builder()
+                .title("Problem After Update")
+                .description("Updated description")
+                .difficulty("Hard")
+                .acceptance("30.0%")
+                .points(25)
+                .testCases("[{\"input\":\"2\",\"output\":\"4\"}]")
+                .build();
+
+        // 2. Regular user should receive 403 Forbidden
+        mockMvc.perform(put("/api/admin/problems/" + problemId)
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updated)))
+                .andExpect(status().isForbidden());
+
+        // 3. Admin should receive 200 OK with updated fields
+        mockMvc.perform(put("/api/admin/problems/" + problemId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updated)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.title").value("Problem After Update"))
+                .andExpect(jsonPath("$.data.difficulty").value("Hard"))
+                .andExpect(jsonPath("$.data.points").value(25));
+    }
 }
+

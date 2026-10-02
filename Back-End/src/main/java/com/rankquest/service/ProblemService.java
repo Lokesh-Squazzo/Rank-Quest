@@ -8,4 +8,5 @@ public interface ProblemService {
     List<Problem> getAllProblems();
     Problem getProblemById(Long id);
     Problem createProblem(ProblemRequest request);
+    Problem updateProblem(Long id, ProblemRequest request);
 }

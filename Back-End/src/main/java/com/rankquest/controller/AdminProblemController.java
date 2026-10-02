@@ -25,4 +25,12 @@ public class AdminProblemController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Problem created successfully", createdProblem));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Problem>> updateProblem(
+            @PathVariable Long id,
+            @Valid @RequestBody ProblemRequest request) {
+        Problem updatedProblem = problemService.updateProblem(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Problem updated successfully", updatedProblem));
+    }
 }

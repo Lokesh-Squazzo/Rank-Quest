@@ -44,4 +44,24 @@ public class ProblemServiceImpl implements ProblemService {
 
         return problemRepository.save(problem);
     }
+
+    @Override
+    @Transactional
+    public Problem updateProblem(Long id, ProblemRequest request) {
+        Problem problem = problemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Problem not found with id: " + id));
+
+        problem.setTitle(request.getTitle());
+        problem.setDescription(request.getDescription());
+        problem.setDifficulty(request.getDifficulty());
+        if (request.getAcceptance() != null) {
+            problem.setAcceptance(request.getAcceptance());
+        }
+        problem.setPoints(request.getPoints());
+        if (request.getTestCases() != null) {
+            problem.setTestCases(request.getTestCases());
+        }
+
+        return problemRepository.save(problem);
+    }
 }
