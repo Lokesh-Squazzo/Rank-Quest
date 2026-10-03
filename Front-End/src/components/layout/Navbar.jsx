@@ -12,7 +12,8 @@ const navigation = [
   { name: 'DSA Sheets', href: '/sheets', icon: BookOpen },
   { name: 'Rankings', href: '/rankings', icon: Trophy },
   { name: 'Resources', href: '/resources', icon: Zap },
-  { name: 'Playground', href: '/playground', icon: Code2 }
+  { name: 'Playground', href: '/playground', icon: Code2 },
+  { name: 'About Us', href: '/about', icon: Users }
 ];
 
 const Navbar = () => {
@@ -161,6 +162,10 @@ const Navbar = () => {
                     
                     <Link to="/settings" className="flex items-center px-4 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setShowUserMenu(false)}>
                       <Settings className="w-4 h-4 mr-2" /> Settings
+                    </Link>
+                    
+                    <Link to="/about" className="flex items-center px-4 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors border-b border-white/5" onClick={() => setShowUserMenu(false)}>
+                      <Users className="w-4 h-4 mr-2 text-primary" /> About & Contributors
                     </Link>
                     
                     <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors">

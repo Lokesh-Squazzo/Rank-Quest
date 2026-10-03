@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   Zap, Target, Trophy, Flame, ArrowRight, 
-  Activity, Calendar, BookOpen, Star, ChevronRight, Code, Layers, Sparkles 
+  Activity, Calendar, BookOpen, Star, ChevronRight, Code, Layers, Sparkles, Users 
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
@@ -62,15 +62,20 @@ const Dashboard = () => {
         <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
           RankQuest gives you the structured roadmap you need. Solve curated problems, track your stats, and compete on the global leaderboard.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 pt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
           <Link to="/login">
-            <Button size="lg" className="h-14 px-10 text-lg border-0 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white rounded-full font-bold shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(16,185,129,0.5)]">
+            <Button size="lg" className="h-14 px-8 text-lg border-0 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white rounded-full font-bold shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(16,185,129,0.5)]">
               Start Solving Now <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
           <Link to="/sheets">
-            <Button size="lg" variant="outline" className="h-14 px-10 text-lg border-2 border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 rounded-full font-medium backdrop-blur-sm transition-all">
+            <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 rounded-full font-medium backdrop-blur-sm transition-all">
               Explore Sheets
+            </Button>
+          </Link>
+          <Link to="/about">
+            <Button size="lg" variant="ghost" className="h-14 px-6 text-base text-gray-300 hover:text-white hover:bg-white/10 border border-white/15 rounded-full font-medium transition-all gap-2">
+              <Users className="w-5 h-5 text-primary" /> Meet Developers
             </Button>
           </Link>
         </div>
