@@ -3,11 +3,11 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Brain, ArrowRight, Loader2, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Brain, ArrowRight, Loader2, Mail, Lock, AlertCircle, Eye, EyeOff, X, CheckCircle2, KeyRound } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
 
@@ -19,19 +19,88 @@ const schema = Yup.object().shape({
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState(null);
-  const { login } = useAuth();
+  const { login, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
 
+  // Forgot password modal state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetFormData, setResetFormData] = useState({
+    email: '',
+    rollNumber: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState(null);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
+
   useEffect(() => {
       setMounted(true);
   }, []);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
+
+  const handleOpenForgotPassword = () => {
+    const currentEmail = watch('email') || '';
+    setResetFormData(prev => ({
+      ...prev,
+      email: currentEmail,
+      rollNumber: '',
+      newPassword: '',
+      confirmPassword: '',
+    }));
+    setResetError(null);
+    setShowForgotPassword(true);
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setResetError(null);
+
+    if (!resetFormData.email.trim()) {
+      setResetError('Email address is required.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetFormData.email.trim())) {
+      setResetError('Please enter a valid email address.');
+      return;
+    }
+    if (!resetFormData.newPassword || resetFormData.newPassword.length < 6) {
+      setResetError('New password must be at least 6 characters.');
+      return;
+    }
+    if (resetFormData.newPassword !== resetFormData.confirmPassword) {
+      setResetError('Passwords do not match.');
+      return;
+    }
+
+    setResetLoading(true);
+    const res = await resetPassword({
+      email: resetFormData.email.trim(),
+      rollNumber: resetFormData.rollNumber.trim() || undefined,
+      newPassword: resetFormData.newPassword,
+    });
+    setResetLoading(false);
+
+    if (res.success) {
+      toast({
+        title: 'Password Reset Successful!',
+        description: 'Your password has been updated. You can now log in.',
+        variant: 'success',
+      });
+      setValue('email', resetFormData.email.trim());
+      setShowForgotPassword(false);
+      setResetFormData({ email: '', rollNumber: '', newPassword: '', confirmPassword: '' });
+    } else {
+      setResetError(res.error || 'Failed to reset password. Please check your details.');
+    }
+  };
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -122,6 +191,13 @@ const Login = () => {
                     <Label htmlFor="password" className="text-gray-300 flex items-center gap-2">
                         <Lock className="w-4 h-4" /> Password
                     </Label>
+                    <button
+                        type="button"
+                        onClick={handleOpenForgotPassword}
+                        className="text-xs text-primary hover:text-primary/80 transition-colors font-medium hover:underline cursor-pointer"
+                    >
+                        Forgot password?
+                    </button>
                 </div>
                 <div className="mt-1 relative">
                   <Input
@@ -184,6 +260,147 @@ const Login = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* FORGOT PASSWORD MODAL */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div 
+            className="fixed inset-0" 
+            onClick={() => !resetLoading && setShowForgotPassword(false)}
+          />
+          <div className="relative w-full max-w-md rounded-2xl bg-[#0e0e17] border border-white/15 shadow-2xl p-6 overflow-hidden z-10 animate-in zoom-in-95 duration-200">
+            {/* Top gradient glow */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
+            
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Reset Password</h3>
+                  <p className="text-xs text-gray-400">Recover and update your account password</p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => !resetLoading && setShowForgotPassword(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-4 pt-4">
+              {resetError && (
+                <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                  <span>{resetError}</span>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-xs text-gray-300 mb-1.5 block">Email Address *</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="email"
+                    required
+                    placeholder="registered-email@example.com"
+                    value={resetFormData.email}
+                    onChange={(e) => setResetFormData({ ...resetFormData, email: e.target.value })}
+                    className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50 text-sm h-10 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs text-gray-300 mb-1.5 block">
+                  Roll Number <span className="text-gray-500 font-normal">(Optional security check)</span>
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="e.g. 21BCSE01"
+                  value={resetFormData.rollNumber}
+                  onChange={(e) => setResetFormData({ ...resetFormData, rollNumber: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50 text-sm h-10 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs text-gray-300 mb-1.5 block">New Password * (min 6 characters)</Label>
+                <div className="relative">
+                  <Input
+                    type={showResetPassword ? "text" : "password"}
+                    required
+                    placeholder="Enter new password"
+                    value={resetFormData.newPassword}
+                    onChange={(e) => setResetFormData({ ...resetFormData, newPassword: e.target.value })}
+                    className="pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50 text-sm h-10 rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword(!showResetPassword)}
+                    className="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+                  >
+                    {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs text-gray-300 mb-1.5 block">Confirm New Password *</Label>
+                <div className="relative">
+                  <Input
+                    type={showResetConfirmPassword ? "text" : "password"}
+                    required
+                    placeholder="Confirm new password"
+                    value={resetFormData.confirmPassword}
+                    onChange={(e) => setResetFormData({ ...resetFormData, confirmPassword: e.target.value })}
+                    className="pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50 text-sm h-10 rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetConfirmPassword(!showResetConfirmPassword)}
+                    className="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+                  >
+                    {showResetConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={resetLoading}
+                  onClick={() => setShowForgotPassword(false)}
+                  className="flex-1 border-white/10 hover:bg-white/5 text-gray-300 rounded-xl h-10"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white rounded-xl h-10 font-medium shadow-md shadow-primary/20"
+                >
+                  {resetLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Reset Password
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

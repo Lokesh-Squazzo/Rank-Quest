@@ -82,4 +82,23 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Error: Invalid email or password");
         }
     }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> resetPassword(com.rankquest.dto.ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail().trim())
+                .orElseThrow(() -> new BadRequestException("No account found with email: " + request.getEmail()));
+
+        if (request.getRollNumber() != null && !request.getRollNumber().isBlank()
+                && user.getRollNumber() != null && !user.getRollNumber().isBlank()) {
+            if (!user.getRollNumber().trim().equalsIgnoreCase(request.getRollNumber().trim())) {
+                throw new BadRequestException("Roll number does not match our records for this account.");
+            }
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ApiResponse.success("Password reset successfully. You can now log in with your new password.");
+    }
 }

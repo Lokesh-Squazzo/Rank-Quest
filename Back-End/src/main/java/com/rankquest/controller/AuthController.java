@@ -3,6 +3,7 @@ package com.rankquest.controller;
 import com.rankquest.dto.ApiResponse;
 import com.rankquest.dto.AuthResponseData;
 import com.rankquest.dto.LoginRequest;
+import com.rankquest.dto.ResetPasswordRequest;
 import com.rankquest.dto.SignUpRequest;
 import com.rankquest.service.AuthService;
 import jakarta.validation.Valid;
@@ -26,6 +27,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponseData>> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         ApiResponse<AuthResponseData> response = authService.authenticateUser(loginRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        ApiResponse<Void> response = authService.resetPassword(request);
         return ResponseEntity.ok(response);
     }
 }

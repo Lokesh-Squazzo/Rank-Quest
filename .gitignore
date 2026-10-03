@@ -12,5 +12,8 @@ Front-End/node_modules/
 Front-End/dist/
 Front-End/.env
 
+# Uploads
+Back-End/uploads/
+
 # OS Files
 .DS_Store

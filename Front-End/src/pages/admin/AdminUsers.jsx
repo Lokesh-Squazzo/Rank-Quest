@@ -20,7 +20,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../contexts/AuthContext';
-import { getAdminUsers, updateUserRole } from '../../services/apiService';
+import { getAdminUsers, updateUserRole, getFullAvatarUrl } from '../../services/apiService';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -277,8 +277,17 @@ const AdminUsers = () => {
                       <tr key={u.id} className="hover:bg-muted/40 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-                              {(u.name || u.username || 'U').charAt(0).toUpperCase()}
+                            <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-gradient-to-tr from-primary to-purple-600 text-white font-bold text-xs shadow-sm">
+                              {u.avatarUrl ? (
+                                <img 
+                                  src={getFullAvatarUrl(u.avatarUrl)} 
+                                  alt={u.name || u.username} 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              ) : (
+                                (u.name || u.username || 'U').charAt(0).toUpperCase()
+                              )}
                             </div>
                             <div>
                               <div className="font-semibold text-foreground flex items-center gap-1.5">

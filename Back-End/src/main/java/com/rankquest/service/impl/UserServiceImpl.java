@@ -1,5 +1,6 @@
 package com.rankquest.service.impl;
 
+import com.rankquest.dto.ChangePasswordRequest;
 import com.rankquest.dto.UpdateProfileRequest;
 import com.rankquest.dto.UserProfileResponse;
 import com.rankquest.exception.ResourceNotFoundException;
@@ -7,6 +8,7 @@ import com.rankquest.model.User;
 import com.rankquest.repository.UserRepository;
 import com.rankquest.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,7 +54,38 @@ public class UserServiceImpl implements UserService {
         if (request.getBio() != null) {
             user.setBio(request.getBio());
         }
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
 
+        user = userRepository.save(user);
+        return new UserProfileResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new com.rankquest.exception.BadRequestException("Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new com.rankquest.exception.BadRequestException("New password cannot be the same as current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse updateAvatar(String email, String avatarUrl) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        user.setAvatarUrl(avatarUrl);
         user = userRepository.save(user);
         return new UserProfileResponse(user);
     }

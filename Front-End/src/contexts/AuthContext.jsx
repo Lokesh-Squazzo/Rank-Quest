@@ -1,5 +1,13 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { loginUser, signupUser, getUserProfile, updateUserProfile as updateUserProfileApi } from '../services/apiService';
+import { 
+  loginUser, 
+  signupUser, 
+  getUserProfile, 
+  updateUserProfile as updateUserProfileApi,
+  changeUserPassword,
+  resetPassword as resetPasswordApi,
+  uploadUserAvatar
+} from '../services/apiService';
 
 const AuthContext = createContext()
 
@@ -37,7 +45,6 @@ export const AuthProvider = ({ children }) => {
            }
         } catch (error) {
            console.warn("Background session check failed. User might need to relogin soon.");
-           // Optional: logout() if 401
         }
       }
     };
@@ -93,9 +100,42 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, error: response.message };
     } catch (error) {
-      return { success: false, error: 'Update failed' };
+      return { success: false, error: error.message || 'Update failed' };
     }
   }
+
+  const changePassword = async (passwordData) => {
+    try {
+      const response = await changeUserPassword(passwordData);
+      return { success: true, message: response.message || 'Password changed successfully' };
+    } catch (error) {
+      return { success: false, error: error.message || 'Failed to change password' };
+    }
+  };
+
+  const resetPassword = async (resetData) => {
+    try {
+      const response = await resetPasswordApi(resetData);
+      return { success: true, message: response.message || 'Password reset successfully' };
+    } catch (error) {
+      return { success: false, error: error.message || 'Failed to reset password' };
+    }
+  };
+
+  const uploadAvatar = async (file) => {
+    try {
+      const response = await uploadUserAvatar(file);
+      if (response && response.success) {
+        const updatedUser = response.data.user || { ...user, avatarUrl: response.data.avatarUrl };
+        setUser(updatedUser);
+        localStorage.setItem('rankquest_user', JSON.stringify(updatedUser));
+        return { success: true, avatarUrl: response.data.avatarUrl, user: updatedUser };
+      }
+      return { success: false, error: response?.message || 'Avatar upload failed' };
+    } catch (error) {
+      return { success: false, error: error.message || 'Avatar upload failed' };
+    }
+  };
 
   const refreshUser = async () => {
     try {
@@ -119,6 +159,9 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    changePassword,
+    resetPassword,
+    uploadAvatar,
     refreshUser,
     isAuthenticated: !!user
   }
@@ -129,3 +172,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   )
 }
+export default AuthContext;

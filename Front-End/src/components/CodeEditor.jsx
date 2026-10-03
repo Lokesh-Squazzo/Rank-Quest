@@ -3,7 +3,7 @@
 import React from 'react';
 import Editor from '@monaco-editor/react';
 
-function CodeEditor({ language, value, onChange, height = "60vh" }) {
+function CodeEditor({ language, value, onChange, height = "60vh", fontSize = 14 }) {
   
   function handleEditorChange(newValue) {
     onChange(newValue);
@@ -18,10 +18,15 @@ function CodeEditor({ language, value, onChange, height = "60vh" }) {
         value={value}
         onChange={handleEditorChange}
         options={{
-          fontSize: 14,
+          fontSize: Number(fontSize) || 14,
           minimap: {
             enabled: false, // Hides the minimap on the side
           },
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          automaticLayout: true,
+          tabSize: 4,
+          formatOnPaste: true,
         }}
       />
     </div>

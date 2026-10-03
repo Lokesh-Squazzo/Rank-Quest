@@ -8,7 +8,8 @@ const request = async (endpoint, options = {}) => {
     const token = localStorage.getItem('rankquest_token');
 
     const headers = {
-        'Content-Type': 'application/json',
+        // Do not set Content-Type if options.body is FormData (browser will set boundary automatically)
+        ...(!(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
         // 2. If token exists, attach it to the Authorization header
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
@@ -38,6 +39,15 @@ const request = async (endpoint, options = {}) => {
     }
 };
 
+export const getFullAvatarUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+    const backendBase = (API_BASE_URL || '').replace(/\/api$/, '');
+    return `${backendBase}${url}`;
+};
+
 // --- Authentication Endpoints ---
 export const signupUser = (userData) => {
     return request('/auth/signup', {
@@ -53,6 +63,13 @@ export const loginUser = (credentials) => {
     });
 };
 
+export const resetPassword = (data) => {
+    return request('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+};
+
 // --- User Profile Endpoints (NEW) ---
 
 export const getUserProfile = () => {
@@ -61,7 +78,7 @@ export const getUserProfile = () => {
     const savedUser = localStorage.getItem('rankquest_user');
     const email = savedUser ? JSON.parse(savedUser).email : '';
 
-    return request(`/users/profile-by-email?email=${email}`, {
+    return request(`/users/profile-by-email?email=${encodeURIComponent(email)}`, {
         method: 'GET',
     });
 };
@@ -70,9 +87,32 @@ export const updateUserProfile = (data) => {
     const savedUser = localStorage.getItem('rankquest_user');
     const email = savedUser ? JSON.parse(savedUser).email : '';
 
-    return request(`/users/profile?email=${email}`, {
+    return request(`/users/profile?email=${encodeURIComponent(email)}`, {
         method: 'PUT',
         body: JSON.stringify(data),
+    });
+};
+
+export const changeUserPassword = (data) => {
+    const savedUser = localStorage.getItem('rankquest_user');
+    const email = savedUser ? JSON.parse(savedUser).email : '';
+
+    return request(`/users/password?email=${encodeURIComponent(email)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+};
+
+export const uploadUserAvatar = async (file) => {
+    const savedUser = localStorage.getItem('rankquest_user');
+    const email = savedUser ? JSON.parse(savedUser).email : '';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return request(`/users/avatar?email=${encodeURIComponent(email)}`, {
+        method: 'POST',
+        body: formData,
     });
 };
 

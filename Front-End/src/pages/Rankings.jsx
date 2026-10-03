@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { useAuth } from '../contexts/AuthContext'
-import { getGlobalRankings, getCollegeRankings } from '../services/apiService'
+import { getGlobalRankings, getCollegeRankings, getFullAvatarUrl } from '../services/apiService'
 
 const Rankings = () => {
   const { user } = useAuth()
@@ -93,8 +93,17 @@ const Rankings = () => {
           return (
             <div key={u.id} className={`relative flex flex-col items-center group`}>
                <div className={`absolute -top-16 transition-all duration-500 group-hover:-translate-y-2 z-20`}>
-                  <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center bg-background shadow-xl ${rank === 1 ? 'border-yellow-500' : rank === 2 ? 'border-slate-400' : 'border-orange-500'}`}>
-                     <span className="text-2xl font-bold text-foreground">{u.name.charAt(0).toUpperCase()}</span>
+                  <div className={`w-20 h-20 rounded-full border-4 overflow-hidden flex items-center justify-center bg-background shadow-xl ${rank === 1 ? 'border-yellow-500' : rank === 2 ? 'border-slate-400' : 'border-orange-500'}`}>
+                    {u.avatarUrl ? (
+                      <img 
+                        src={getFullAvatarUrl(u.avatarUrl)} 
+                        alt={u.name} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span className="text-2xl font-bold text-foreground">{u.name.charAt(0).toUpperCase()}</span>
+                    )}
                   </div>
                   {rank === 1 && <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-8 text-yellow-400 fill-yellow-400 animate-bounce" />}
                </div>
@@ -213,10 +222,19 @@ const Rankings = () => {
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex items-center">
-                                  <div className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-inner ${
+                                  <div className={`flex-shrink-0 h-10 w-10 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold text-white shadow-inner ${
                                     ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'][index % 4]
                                   }`}>
-                                    {rankUser.name.charAt(0).toUpperCase()}
+                                    {rankUser.avatarUrl ? (
+                                      <img 
+                                        src={getFullAvatarUrl(rankUser.avatarUrl)} 
+                                        alt={rankUser.name} 
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                      />
+                                    ) : (
+                                      rankUser.name.charAt(0).toUpperCase()
+                                    )}
                                   </div>
                                   <div className="ml-4">
                                     <div className={`text-sm font-bold flex items-center ${

@@ -45,6 +45,9 @@ public class User {
     @Column(length = 1000)
     private String bio;
 
+    @Column(columnDefinition = "TEXT")
+    private String avatarUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

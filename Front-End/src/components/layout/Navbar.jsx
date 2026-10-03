@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext'; // Import Theme Hook
 import { useToast } from '../../hooks/useToast';
+import { getFullAvatarUrl } from '../../services/apiService';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -114,8 +115,19 @@ const Navbar = () => {
                   onClick={() => setShowUserMenu(!showUserMenu)} 
                   className="flex items-center rounded-full p-1 pr-3 hover:bg-white/10"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md">
-                    {getInitial()}
+                  <div className="w-8 h-8 rounded-full overflow-hidden mr-2 shadow-md shrink-0 border border-white/20">
+                    {user?.avatarUrl ? (
+                      <img 
+                        src={getFullAvatarUrl(user.avatarUrl)} 
+                        alt={getDisplayName()} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-r from-primary to-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                        {getInitial()}
+                      </div>
+                    )}
                   </div>
                   <span className="font-medium">{getDisplayName()}</span>
                 </Button>
@@ -197,8 +209,19 @@ const Navbar = () => {
             {isAuthenticated && (
                <div className="pt-4 mt-4 border-t border-white/10">
                   <div className="flex items-center px-3 mb-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-primary to-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                      {getInitial()}
+                    <div className="w-8 h-8 rounded-full overflow-hidden mr-3 shrink-0 border border-white/20">
+                      {user?.avatarUrl ? (
+                        <img 
+                          src={getFullAvatarUrl(user.avatarUrl)} 
+                          alt={getDisplayName()} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-r from-primary to-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                          {getInitial()}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <div className="font-medium text-foreground">{getDisplayName()}</div>

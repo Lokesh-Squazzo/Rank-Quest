@@ -1,21 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; 
 import { 
   User, Mail, Camera, Trophy, Target, Zap, 
-  BookOpen, Key, Edit, Award, CheckCircle2, XCircle, Clock, Play, Code2
+  BookOpen, Key, Edit, Award, CheckCircle2, XCircle, Clock, Play, Code2, Loader2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { useAuth } from '../contexts/AuthContext';
-import { getSolvedProblems, getGlobalRankings, getCollegeRankings, getMySubmissionHistory } from '../services/apiService'; // Added ranking APIs
+import { useToast } from '../hooks/useToast';
+import { getSolvedProblems, getGlobalRankings, getCollegeRankings, getMySubmissionHistory, getFullAvatarUrl } from '../services/apiService'; // Added ranking APIs
 import { getDifficultyStats, problems } from '../data/problems';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, uploadAvatar } = useAuth();
   const navigate = useNavigate(); 
+  const { toast } = useToast();
+  const fileInputRef = useRef(null);
   
   const [loading, setLoading] = useState(true);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [stats, setStats] = useState({ Easy: 0, Medium: 0, Hard: 0, Total: 0 });
   const [sheetsCompleted, setSheetsCompleted] = useState(0);
   
@@ -86,6 +90,56 @@ const Profile = () => {
     fetchData();
   }, [user]);
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ 
+        title: "Invalid File", 
+        description: "Please select an image file (PNG, JPG, WEBP).", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ 
+        title: "File Too Large", 
+        description: "Image size must be less than 5MB.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const res = await uploadAvatar(file);
+      if (res.success) {
+        toast({ 
+          title: "Profile Picture Updated", 
+          description: "Your new avatar has been applied.", 
+          variant: "success" 
+        });
+      } else {
+        toast({ 
+          title: "Upload Failed", 
+          description: res.error || "Failed to upload avatar.", 
+          variant: "destructive" 
+        });
+      }
+    } catch (err) {
+      toast({ 
+        title: "Error", 
+        description: "An error occurred while uploading picture.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const userLevel = Math.floor(stats.Total / 5) + 1;
 
   if (loading) {
@@ -119,14 +173,39 @@ const Profile = () => {
             {/* 1. User Identity Card */}
             <Card className="glass-dark border-0">
                 <CardContent className="pt-8 flex flex-col items-center text-center">
-                <div className="relative mb-6 group cursor-pointer">
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-purple-600 p-[3px]">
-                    <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-4xl font-bold text-white overflow-hidden">
-                        {user?.username?.charAt(0).toUpperCase()}
+                <div 
+                  className="relative mb-6 group cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Click to change profile picture"
+                >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-purple-600 p-[3px] shadow-xl group-hover:scale-105 transition-transform duration-300">
+                      <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-4xl font-bold text-white overflow-hidden relative">
+                        {user?.avatarUrl ? (
+                          <img 
+                            src={getFullAvatarUrl(user.avatarUrl)} 
+                            alt={user?.username || 'Avatar'} 
+                            className="w-full h-full object-cover rounded-full"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <span>{user?.username?.charAt(0).toUpperCase()}</span>
+                        )}
+                        {uploadingAvatar && (
+                          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    </div>
-                    <div className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full shadow-lg border-4 border-background group-hover:scale-110 transition-transform">
-                    <Camera className="w-4 h-4" />
+                    <div className="absolute bottom-0 right-0 p-2.5 bg-primary text-white rounded-full shadow-lg border-4 border-background group-hover:scale-110 transition-transform">
+                      <Camera className="w-4 h-4" />
                     </div>
                 </div>
 

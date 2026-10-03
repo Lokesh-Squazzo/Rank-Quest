@@ -21,6 +21,7 @@ public class UserProfileResponse {
     private String year;
     private String location;
     private String bio;
+    private String avatarUrl;
     private String role;
     private int totalScore;
     private int problemsSolved;
@@ -37,9 +38,14 @@ public class UserProfileResponse {
             this.year = user.getYear();
             this.location = user.getLocation();
             this.bio = user.getBio();
+            this.avatarUrl = user.getAvatarUrl();
             this.role = user.getRole() != null ? user.getRole().name() : null;
             this.totalScore = user.getTotalScore();
             this.problemsSolved = user.getProblemsSolved();
         }
+    }
+
+    public String getAvatar() {
+        return avatarUrl;
     }
 }
