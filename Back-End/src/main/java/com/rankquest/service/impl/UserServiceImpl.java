@@ -55,4 +55,29 @@ public class UserServiceImpl implements UserService {
         user = userRepository.save(user);
         return new UserProfileResponse(user);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<UserProfileResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserProfileResponse::new)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse updateUserRole(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        try {
+            com.rankquest.model.Role role = com.rankquest.model.Role.valueOf(roleName.toUpperCase());
+            user.setRole(role);
+        } catch (IllegalArgumentException e) {
+            throw new com.rankquest.exception.BadRequestException("Invalid role: " + roleName + ". Allowed roles: USER, ADMIN");
+        }
+
+        user = userRepository.save(user);
+        return new UserProfileResponse(user);
+    }
 }
