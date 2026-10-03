@@ -97,6 +97,21 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const refreshUser = async () => {
+    try {
+      const response = await getUserProfile();
+      if (response && response.success) {
+        const freshUser = response.data.user;
+        setUser(freshUser);
+        localStorage.setItem('rankquest_user', JSON.stringify(freshUser));
+        return freshUser;
+      }
+    } catch (error) {
+      console.warn('Failed to refresh user profile:', error);
+    }
+    return null;
+  };
+
   const value = {
     user,
     loading,
@@ -104,6 +119,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    refreshUser,
     isAuthenticated: !!user
   }
 

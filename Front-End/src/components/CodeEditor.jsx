@@ -3,17 +3,17 @@
 import React from 'react';
 import Editor from '@monaco-editor/react';
 
-function CodeEditor({ language, value, onChange }) {
+function CodeEditor({ language, value, onChange, height = "60vh" }) {
   
   function handleEditorChange(newValue) {
     onChange(newValue);
   }
 
   return (
-    <div className="border border-gray-700 rounded-md overflow-hidden">
+    <div className="border border-white/10 rounded-xl overflow-hidden shadow-inner">
       <Editor
-        height="70vh" // You can adjust the height
-        theme="vs-dark" // The classic VS Code dark theme
+        height={height}
+        theme="vs-dark"
         language={language}
         value={value}
         onChange={handleEditorChange}
