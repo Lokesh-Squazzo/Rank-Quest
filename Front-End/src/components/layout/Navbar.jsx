@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, User, Settings, LogOut, Code2, Trophy, BookOpen, Zap, Brain, Home, Moon, Sun, Shield } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, Code2, Trophy, BookOpen, Zap, Brain, Home, Moon, Sun, Shield, Users } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext'; // Import Theme Hook
@@ -133,9 +133,14 @@ const Navbar = () => {
                     </div>
                     
                     {user?.role === 'ADMIN' && (
-                      <Link to="/admin/problems" className="flex items-center px-4 py-3 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors font-medium border-b border-white/5" onClick={() => setShowUserMenu(false)}>
-                        <Shield className="w-4 h-4 mr-2 text-purple-400" /> Admin Dashboard
-                      </Link>
+                      <>
+                        <Link to="/admin/problems" className="flex items-center px-4 py-2.5 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors font-medium" onClick={() => setShowUserMenu(false)}>
+                          <Shield className="w-4 h-4 mr-2 text-purple-400" /> Manage Problems
+                        </Link>
+                        <Link to="/admin/users" className="flex items-center px-4 py-2.5 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors font-medium border-b border-white/5" onClick={() => setShowUserMenu(false)}>
+                          <Users className="w-4 h-4 mr-2 text-purple-400" /> Manage Users
+                        </Link>
+                      </>
                     )}
 
                     <Link to="/profile" className="flex items-center px-4 py-3 text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setShowUserMenu(false)}>
@@ -201,9 +206,14 @@ const Navbar = () => {
                     </div>
                   </div>
                   {user?.role === 'ADMIN' && (
-                    <Link to="/admin/problems" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-2 text-base font-medium text-purple-400 hover:bg-purple-500/10 rounded-md">
-                      <Shield className="w-4 h-4 mr-2" /> Admin Dashboard
-                    </Link>
+                    <>
+                      <Link to="/admin/problems" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-2 text-base font-medium text-purple-400 hover:bg-purple-500/10 rounded-md">
+                        <Shield className="w-4 h-4 mr-2" /> Manage Problems
+                      </Link>
+                      <Link to="/admin/users" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-2 text-base font-medium text-purple-400 hover:bg-purple-500/10 rounded-md">
+                        <Users className="w-4 h-4 mr-2" /> Manage Users
+                      </Link>
+                    </>
                   )}
                   <Link to="/settings" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-foreground hover:bg-white/5 rounded-md">Settings</Link>
                   <button onClick={() => { handleLogout(); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-base font-medium text-red-400 hover:bg-white/5 rounded-md">Sign Out</button>

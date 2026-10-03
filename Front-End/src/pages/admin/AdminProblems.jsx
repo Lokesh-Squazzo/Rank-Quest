@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit3, Trash2, Shield, Code, CheckCircle, 
-  AlertTriangle, X, Loader2, Sparkles, Filter, ExternalLink
+  AlertTriangle, X, Loader2, Sparkles, Filter, ExternalLink, Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -213,28 +213,47 @@ const AdminProblems = () => {
     <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10">
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-6">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400">
-                <Shield className="w-5 h-5" />
-              </div>
-              <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-                Problem Management
-              </h1>
+        {/* Header Section with Navigation Tabs */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/10 pb-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400">
+              <Shield className="w-6 h-6" />
             </div>
-            <p className="text-sm text-gray-400 mt-1">
-              Create, update, and manage competitive programming problems for students
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                Admin Console
+              </h1>
+              <p className="text-xs text-gray-400">
+                Manage platform problems, users, and permissions
+              </p>
+            </div>
           </div>
 
-          <Button 
-            onClick={handleOpenCreateModal}
-            className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white font-medium rounded-xl px-5 py-2.5 shadow-lg shadow-purple-600/20 flex items-center gap-2 self-start sm:self-auto"
-          >
-            <Plus className="w-4 h-4" /> Add Problem
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex space-x-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
+              <Link
+                to="/admin/problems"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white/10 text-white shadow-sm"
+              >
+                <Code className="w-3.5 h-3.5 inline mr-1.5 text-purple-400" />
+                Problems
+              </Link>
+              <Link
+                to="/admin/users"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-gray-400 hover:text-white"
+              >
+                <Users className="w-3.5 h-3.5 inline mr-1.5" />
+                Users & Permissions
+              </Link>
+            </div>
+
+            <Button 
+              onClick={handleOpenCreateModal}
+              className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white font-medium rounded-xl px-4 py-2 text-xs shadow-lg shadow-purple-600/20 flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" /> Add Problem
+            </Button>
+          </div>
         </div>
 
         {/* Stats Row */}

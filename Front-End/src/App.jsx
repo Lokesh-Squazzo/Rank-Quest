@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import CodePlayground from './pages/CodePlayground';
 import AdminRoute from './components/AdminRoute';
 import AdminProblems from './pages/admin/AdminProblems';
+import AdminUsers from './pages/admin/AdminUsers';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
           {/* Admin Protected Pages */}
           <Route path="/admin" element={<AdminRoute><AdminProblems /></AdminRoute>} />
           <Route path="/admin/problems" element={<AdminRoute><AdminProblems /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
 
         </Routes>
         </ErrorBoundary>
