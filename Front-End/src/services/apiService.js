@@ -215,3 +215,31 @@ export const deleteAdminProblem = async (problemId) => {
     return res;
 };
 
+// --- Submission History Endpoints ---
+export const getProblemSubmissions = (problemId) => {
+    return request(`/submissions/problem/${problemId}`, {
+        method: 'GET',
+    });
+};
+
+export const getMySubmissionHistory = () => {
+    return request('/submissions/my-history', {
+        method: 'GET',
+    });
+};
+
+// --- Admin User Management Endpoints ---
+export const getAdminUsers = () => {
+    return request('/admin/users', {
+        method: 'GET',
+    });
+};
+
+export const updateUserRole = (userId, role) => {
+    return request(`/admin/users/${userId}/role`, {
+        method: 'PUT',
+        body: JSON.stringify({ role }),
+    });
+};
+
+
