@@ -124,6 +124,25 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
+### 1.5 Password Reset
+**POST** `/auth/reset-password`
+
+**Request Body:**
+```json
+{
+  "token": "reset_token_or_email_verification",
+  "newPassword": "newSecurePassword123"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Password reset successfully"
+}
+```
+
 ---
 
 ## 2. User Profile APIs
@@ -242,18 +261,20 @@ Authorization: Bearer <jwt_token>
 ### 2.4 Upload Avatar
 **POST** `/users/avatar` (Authenticated)
 
-**Request:** Multipart form data with image file
+**Request:** Multipart form data with image file (`avatar` form field)
 
 **Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "Avatar uploaded successfully",
-  "data": {
-    "avatarUrl": "https://api.dsaplatform.com/avatars/user_123.png"
-  }
+  "avatarUrl": "/api/users/avatar/a1b2c3d4-e5f6-7890.png"
 }
 ```
+
+### 2.5 Get Avatar Image
+**GET** `/users/avatar/{filename}` (Public)
+
+**Response (200 OK):**
+Binary image stream with `Content-Type: image/png` or `image/jpeg`.
 
 ---
 
