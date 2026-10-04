@@ -4,7 +4,6 @@ import { Card, CardContent } from '../ui/card'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 const AdvancedSearch = ({ onSearch, placeholder = "Search problems, topics, or concepts..." }) => {
   const [mounted, setMounted] = useState(false)

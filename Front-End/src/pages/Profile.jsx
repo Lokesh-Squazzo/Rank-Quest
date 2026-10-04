@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; 
 import { 
   User, Mail, Camera, Trophy, Target, Zap, 
-  BookOpen, Key, Edit, Award, CheckCircle2, XCircle, Clock, Play, Code2, Loader2
+  BookOpen, Key, Edit, Award, CheckCircle2, XCircle, Clock, Play, Code2, Loader2,
+  BarChart3
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -11,6 +12,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
 import { getSolvedProblems, getGlobalRankings, getCollegeRankings, getMySubmissionHistory, getFullAvatarUrl } from '../services/apiService'; // Added ranking APIs
 import { getDifficultyStats, problems } from '../data/problems';
+import GamificationSystem from '../components/features/GamificationSystem';
+import ProgressAnalytics from '../components/features/ProgressAnalytics';
 
 const Profile = () => {
   const { user, uploadAvatar } = useAuth();
@@ -21,7 +24,9 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [stats, setStats] = useState({ Easy: 0, Medium: 0, Hard: 0, Total: 0 });
+  const [solvedSet, setSolvedSet] = useState(new Set());
   const [sheetsCompleted, setSheetsCompleted] = useState(0);
+  const [activeProfileTab, setActiveProfileTab] = useState('achievements');
   
   // New State for Ranks
   const [ranks, setRanks] = useState({ global: '-', college: '-' });
@@ -39,7 +44,8 @@ const Profile = () => {
             setStats(realStats);
 
             // Completed Sheets Logic
-            const solvedSet = new Set(solvedIds);
+            const sSet = new Set(solvedIds);
+            setSolvedSet(sSet);
             const sheetMap = {};
             problems.forEach(p => {
                 if (!sheetMap[p.sheet]) sheetMap[p.sheet] = [];
@@ -48,7 +54,7 @@ const Profile = () => {
 
             let completedCount = 0;
             Object.values(sheetMap).forEach(ids => {
-                if (ids.length > 0 && ids.every(id => solvedSet.has(id))) {
+                if (ids.length > 0 && ids.every(id => sSet.has(id))) {
                     completedCount++;
                 }
             });
@@ -326,110 +332,120 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* 2. Achievements */}
-            <Card className="glass-dark border-0">
-              <CardHeader>
-                <CardTitle>Achievements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className={`p-4 rounded-xl border flex flex-col items-center text-center gap-2 ${stats.Total > 0 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-white/5 border-white/5 opacity-50'}`}>
-                    <div className="p-2 bg-amber-500/20 rounded-full text-amber-500">
-                      <Target className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm">First Steps</h4>
-                      <p className="text-xs text-muted-foreground">Solved first problem</p>
-                    </div>
-                  </div>
-                  
-                  <div className={`p-4 rounded-xl border flex flex-col items-center text-center gap-2 ${stats.Total >= 10 ? 'bg-blue-500/10 border-blue-500/20' : 'bg-white/5 border-white/5 opacity-50'}`}>
-                    <div className="p-2 bg-blue-500/20 rounded-full text-blue-500">
-                      <BookOpen className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm">Dedicated</h4>
-                      <p className="text-xs text-muted-foreground">Solved 10 problems</p>
-                    </div>
-                  </div>
+            {/* 2. Interactive Feature Tabs */}
+            <div className="flex items-center gap-2 p-1 bg-white/5 border border-white/10 rounded-xl overflow-x-auto">
+              {[
+                { id: 'achievements', label: 'Badges & Achievements', icon: Trophy },
+                { id: 'analytics', label: 'Skill Analytics', icon: BarChart3 },
+                { id: 'submissions', label: `Submissions (${recentSubmissions.length})`, icon: Clock }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeProfileTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveProfileTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                      isActive 
+                        ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-                  <div className={`p-4 rounded-xl border flex flex-col items-center text-center gap-2 ${stats.Total >= 50 ? 'bg-purple-500/10 border-purple-500/20' : 'bg-white/5 border-white/5 opacity-50'}`}>
-                    <div className="p-2 bg-purple-500/20 rounded-full text-purple-500">
-                      <Trophy className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm">Master</h4>
-                      <p className="text-xs text-muted-foreground">Solved 50 problems</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* TAB CONTENT 1: ACHIEVEMENTS & BADGES */}
+            {activeProfileTab === 'achievements' && (
+              <div className="animate-fade-in">
+                <GamificationSystem 
+                  userStats={stats} 
+                  solvedProblems={solvedSet} 
+                  user={user} 
+                />
+              </div>
+            )}
 
-            {/* 3. Recent Activity */}
-            <Card className="glass-dark border-0">
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-primary" /> Recent Submissions
-                </CardTitle>
-                <Button variant="ghost" size="sm" asChild className="text-xs text-primary">
-                  <Link to="/sheets">Explore More Problems</Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {recentSubmissions.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8 border border-dashed border-white/10 rounded-xl">
-                    <Code2 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-sm font-medium">No submissions recorded yet.</p>
-                    <p className="text-xs text-muted-foreground mt-1 mb-4">Start solving DSA sheets to see your attempt history here!</p>
-                    <Button size="sm" asChild>
-                      <Link to="/sheets">Browse DSA Sheets</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {recentSubmissions.map((sub, idx) => {
-                      const isAccepted = sub.status === 'ACCEPTED';
-                      return (
-                        <div
-                          key={sub.id || idx}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/15 transition-all gap-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${isAccepted ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
-                              {isAccepted ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                            </div>
-                            <div>
-                              <div className="font-semibold text-sm text-foreground flex items-center gap-2">
-                                <span>{sub.problemTitle || `Problem #${sub.problemId}`}</span>
-                                <Badge variant="outline" className="text-[10px] uppercase font-mono px-1.5 py-0">
-                                  {sub.language || 'code'}
-                                </Badge>
+            {/* TAB CONTENT 2: SKILL ANALYTICS */}
+            {activeProfileTab === 'analytics' && (
+              <div className="animate-fade-in">
+                <ProgressAnalytics 
+                  userStats={stats} 
+                  solvedProblems={solvedSet} 
+                  submissions={recentSubmissions} 
+                />
+              </div>
+            )}
+
+            {/* TAB CONTENT 3: RECENT SUBMISSIONS */}
+            {activeProfileTab === 'submissions' && (
+              <Card className="glass-dark border-0 animate-fade-in">
+                <CardHeader className="flex flex-row items-center justify-between pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" /> Live Submission History
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" asChild className="text-xs text-primary">
+                    <Link to="/sheets">Browse All Sheets</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {recentSubmissions.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8 border border-dashed border-white/10 rounded-xl">
+                      <Code2 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                      <p className="text-sm font-medium">No submissions recorded yet.</p>
+                      <p className="text-xs text-muted-foreground mt-1 mb-4">Start solving DSA sheets to see your attempt history here!</p>
+                      <Button size="sm" asChild>
+                        <Link to="/sheets">Browse DSA Sheets</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentSubmissions.map((sub, idx) => {
+                        const isAccepted = sub.status === 'ACCEPTED';
+                        return (
+                          <div
+                            key={sub.id || idx}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/15 transition-all gap-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-full ${isAccepted ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
+                                {isAccepted ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                               </div>
-                              <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
-                                <span className={isAccepted ? 'text-emerald-500 font-medium' : 'text-destructive font-medium'}>
-                                  {sub.status}
-                                </span>
-                                <span>•</span>
-                                <span>{sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : 'Recent'}</span>
+                              <div>
+                                <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                                  <span>{sub.problemTitle || `Problem #${sub.problemId}`}</span>
+                                  <Badge variant="outline" className="text-[10px] uppercase font-mono px-1.5 py-0">
+                                    {sub.language || 'code'}
+                                  </Badge>
+                                </div>
+                                <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
+                                  <span className={isAccepted ? 'text-emerald-500 font-medium' : 'text-destructive font-medium'}>
+                                    {sub.status}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : 'Recent'}</span>
+                                </div>
                               </div>
                             </div>
+
+                            {sub.problemId && (
+                              <Button variant="outline" size="sm" asChild className="h-8 text-xs gap-1 self-end sm:self-auto">
+                                <Link to={`/problem/${sub.problemId}`}>
+                                  <Play className="w-3 h-3 fill-current" /> Solve Again
+                                </Link>
+                              </Button>
+                            )}
                           </div>
-
-                          {sub.problemId && (
-                            <Button variant="outline" size="sm" asChild className="h-8 text-xs gap-1 self-end sm:self-auto">
-                              <Link to={`/problem/${sub.problemId}`}>
-                                <Play className="w-3 h-3 fill-current" /> Solve Again
-                              </Link>
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
           </div>
         </div>
